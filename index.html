@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			"use strict";
+			addEventListener("DOMContentLoaded",()=>{
+				let nodes=document.querySelectorAll("*|svg.dotloader");
+				const _n=nodes.length,
+				SVG="http://www.w3.org/2000/svg";
+				for(let i=0;i<_n;i++){
+					let node=nodes[i],
+					dataset=node.dataset,
+					circle=document.createElementNS(SVG,"circle"),
+					circles=[];
+					if(!node.hasAttribute("viewBox"))node.setAttribute("viewBox",`0 ${-dataset.radius} ${dataset.width} ${2*dataset.radius}`);
+					setAttributes(circle,{
+						cx:-dataset.radius,
+						r:dataset.radius
+					});
+					let animate=document.createElementNS(SVG,"animate"),
+					to=Number(dataset.width)+Number(dataset.radius);
+					setAttributes(animate,{
+						attributeName:"cx",
+						from:-dataset.radius,
+						to:to,
+						dur:(dataset.count||1)*2+"s",
+						repeatCount:"indefinite"
+					});
+					if(dataset.values&&dataset.keytimes){
+						setAttributes(animate,{
+							values:-dataset.radius+";"+dataset.values+";"+to,
+							keyTimes:"0;"+dataset.keytimes+";1"
+						});
+						if(dataset.keysplines)animate.setAttribute("keySplines",dataset.keysplines);
+					}
+					circle.appendChild(animate);
+					for(let n=dataset.count||1;n>0;){
+						circles[n]=circle.cloneNode(1);
+						circles[n].querySelector("animate").setAttribute("begin",(--n)*(dataset.delay||1)+"s");
+					}
+					node.append(...circles);
+				}
+				function setAttributes(element,attr){
+					for(let i in attr)element.setAttribute(i,attr[i]);
+				}
+			});
+		</script>
+	</head>
+	<body>
+		<svg class="dotloader" xmlns="http://www.w3.org/2000/svg" version="1.1"
+			data-info-required="data-width;data-radius"
+			data-values="65%;90%" data-keyTimes="0.5;.9"
+			data-keySplines="0,0,.6,1;0.47,0,0.745,0.715;0.39,0.575,0.565,1;.6,0,0,0"
+			data-width="1000"
+			data-radius="25"
+			data-delay="2" data-count="12">
+			<!--Must include start and end splines for keySplines-->
+		</svg>
+	</body>
+</html>
