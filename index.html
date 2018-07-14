@@ -10,10 +10,11 @@
 				for(let i=0;i<_n;i++){
 					let node=nodes[i],
 					dataset=node.dataset,
-					circle=document.createElementNS(SVG,"circle"),
-					circles=[];
-					if(!node.hasAttribute("viewBox"))node.setAttribute("viewBox",`0 ${-dataset.radius} ${dataset.width} ${2*dataset.radius}`);
-					setAttributes(circle,{
+					circles=[document.createElementNS(SVG,"circle")];
+					if(!node.hasAttribute("viewBox"))node.setAttribute("viewBox",
+						[0,-dataset.radius,dataset.width,2*dataset.radius].join(" ")
+					);
+					setAttributes(circles[0],{
 						cx:-dataset.radius,
 						r:dataset.radius
 					});
@@ -33,9 +34,9 @@
 						});
 						if(dataset.keysplines)animate.setAttribute("keySplines",dataset.keysplines);
 					}
-					circle.appendChild(animate);
+					circles[0].appendChild(animate);
 					for(let n=dataset.count||1;n>0;){
-						circles[n]=circle.cloneNode(1);
+						circles[n]=circles[0].cloneNode(1);
 						circles[n].querySelector("animate").setAttribute("begin",(--n)*(dataset.delay||1)+"s");
 					}
 					node.append(...circles);
@@ -47,8 +48,8 @@
 		</script>
 	</head>
 	<body>
-		<svg class="dotloader" xmlns="http://www.w3.org/2000/svg" version="1.1"
-			data-info-required="data-width;data-radius"
+		<svg class="dotloader" xmlns="http://www.w3.org/2000/svg" version="2.0"
+			info:required="data-width;data-radius"
 			data-values="65%;90%" data-keyTimes="0.5;.9"
 			data-keySplines="0,0,.6,1;0.47,0,0.745,0.715;0.39,0.575,0.565,1;.6,0,0,0"
 			data-width="1000"
