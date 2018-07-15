@@ -1,14 +1,6 @@
 "use strict";
 {
-	const funcs={
-		synchronousWait:(t=1e+10)=>{for(let i=0;i<t;i++)continue;return 'done'},
-		add:function(...n){return n.reduce((a,v)=>a+v)},
-		subtract:function(...n){return n.reduce((a,v)=>a-v)},
-		multiply:function(...n){return n.reduce((a,v)=>a*v)},
-		divide:function(...n){return n.reduce((a,v)=>a/v)}
-		//Other functions to be called
-		//`script-src 'unsafe-eval';` not required to call
-	};
+	const funcs=[funcs Object];
 	if(isWorker())onmessage=e=>{
 		switch(e.data.act){
 			case "save":
