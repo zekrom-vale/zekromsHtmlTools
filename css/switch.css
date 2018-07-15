@@ -6,28 +6,41 @@
 	<span></span>
 </label>
 <style type="pseudo-css">
+
+.switch.reverse{
+	--ACTION:"Reverses the direction of the switch";
+}
+
+.switch.rotate{
+	--ACTION:"Makes the switch vertical";
+}
+
 .switch{
+	--NOTE:"Switch container";
 	--height:2em;
 	--width:3.5em;
 }
 .switch span{
+	--NOTE:"";
 	--long;
 	--short;
 	--on:#2196F3;
-	--off:#ccc;
-	--fg:white;
-	--time:.4s;
+	background-color:#ccc;
+		--NOTE:"used when off";
 	--start;
 	--end;
 }
 
 .switch span::before{
+	background-color:white;
 	--bottom-short;
 	--bottom;
 	--ratio:0.722;
 	--inner;
 	--inner-short;
 	--inner-long;
+	transition:.4s;
+	-webkit-transition:.4s;
 }
 </style>
 
@@ -48,9 +61,7 @@
 
 .switch span{
 	--on:#2196F3;
-	--off:#ccc;
-	background-color:var(--off);
-	--time:.4s;
+	background-color:#ccc;
 	position:absolute;
 	cursor:pointer;
 	top:0;
@@ -61,25 +72,24 @@
 
 .switch:not(.reverse) span::before{
 	--start:var(--bottom);
-	--end:calc(var(--long) - var(--start) * 2 - var(--inner-long,var(--inner)));
+	--end:calc(var(--long) - var(--start)*2 - var(--inner-long,var(--inner)));
 }.switch.reverse span::before{
 	--start:calc(var(--long) - var(--bottom) - var(--inner-long,var(--inner)));
 	--end:calc(-1 * var(--start) + var(--bottom));
 }
 
 .switch span::before{
-	--color:white;
-	--bottom-short:calc(calc(var(--short) - var(--inner-short,var(--inner))) / 2);
-	--bottom:calc(calc(var(--short) - var(--inner)) / 2);
-	--ratio:0.72222222222;
+	--bottom-short:calc(calc(var(--short) - var(--inner-short,var(--inner)))/2);
+	--bottom:calc(calc(var(--short) - var(--inner))/2);
+	--ratio:0.722;
 	--inner:calc(var(--short) * var(--ratio));
 	--inner-short:calc(var(--short) * var(--ratioShort));
 	--inner-long:calc(var(--long) * var(--ratioLong));
 	position:absolute;
 	content:"";
-	background-color:var(--color);
-	transition:var(--time);
-	-webkit-transition:var(--time);
+	background-color:white;
+	transition:.4s;
+	-webkit-transition:.4s;
 	height:var(--inner-short,var(--inner));
 	width:var(--inner-long,var(--inner));
 }
