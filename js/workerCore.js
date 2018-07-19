@@ -1,27 +1,30 @@
 "use strict";
-//Call worker with the functions required (strings recommended Ex:"function(){doStuff}")
-//Then await for worker to process your functions before requesting
-//CSP `script-src blob:` required
-var worker=function(funcs){
-	/*worker({
+/*
+CSP:The Content Security Policy is a way to restrict content from ruining on a page, by default it allows all content.
+Call worker with the functions required (strings recommended Ex:"function(){doStuff}")
+Then await for worker to process your functions before requesting
+CSP `script-src blob:` required
+	worker({
 		synchronousWait:"(t=1e+10)=>{for(let i=0;i<t;i++)continue;return 'done'}",
 		add:'function(...n){return n.reduce((a,v)=>a+v)}',
 		subtract:`function(...n){return n.reduce((a,v)=>a-v)}`,
 		multiply:"function(...n){return n.reduce((a,v)=>a*v)}",
-		divide:function(...n){return n.reduce((a,v)=>a/v)}//Wastes time on back-end optimization
+		divide:function(...n){return n.reduce((a,v)=>a/v)}//Wastes time on back-end optimizations
 		//Other functions to be called
 		//CSP `script-src 'unsafe-eval';` not required to call
-	})*/
+	});
+*/
+var worker=function(funcs){
 	var funcsArr=[],
 	n=0;
 	for(let i in funcs)funcsArr[n++]=i+":"+funcs[i].toString();
 	return new Promise(resolve=>{
-		fetch("webWorker/worker.js").then(r=>r.text()).then(text=>{
-			var url=URL.createObjectURL(new Blob(text.replace('[funcs Object]'),"{"+funcsArr.join(",")+"}",{type:"application/javascript"}));
+		fetch("js/worker.js").then(r=>r.text()).then(text=>{
+			var url=URL.createObjectURL(new Blob(text.replace('[funcs Object]'),funcsArr.join(","),{type:"application/javascript"}));
 			if(self.Worker){
 				var response,
 				queue=[];//pseudo-queue
-				const worker=new Worker(url),
+				const coreWorker=new Worker(url),//Revoke url and blob?
 				end=new CustomEvent("end"),
 				___call=(func,that,args,act)=>{
 					const _q=queue.length,
@@ -29,8 +32,8 @@ var worker=function(funcs){
 					if(_q===0){
 						queue[0]=undefined;
 						return new Promise(r=>{
-							worker.postMessage(obj);
-							worker.onerror=worker.onmessage=e=>{
+							coreWorker.postMessage(obj);
+							coreWorker.onerror=coreWorker.onmessage=e=>{
 								if(queue.length>1)queue[1].run();
 								else queue=[];
 								r(e.data||e);
@@ -52,12 +55,12 @@ var worker=function(funcs){
 					//requires CSP of `script-src 'unsafe-eval';`
 					eval:(func,that,args={})=>___call(func,that,args,"eval"),
 					save:(name,func,args=[])=>{
-						worker.postMessage({func:func,args:args,name:name,act:"save"});
+						coreWorker.postMessage({func:func,args:args,name:name,act:"save"});
 					}
 				}
 				function run(obj){
-					worker.postMessage(obj);
-					worker.onerror=worker.onmessage=e=>{
+					coreWorker.postMessage(obj);
+					coreWorker.onerror=coreWorker.onmessage=e=>{
 						response=e.data||e;
 						queue[this].event.dispatchEvent(end);
 						if(queue.length-1>this)queue[this+1].run();
@@ -75,16 +78,16 @@ var worker=function(funcs){
 				worker=function(){
 					const ___call=(func,that,args,act)=>new Promise(r=>{
 						switch(act){
-							case "call":
+							case"call":
 								r(worker.funcs[func].apply(that,args));
 								break;
-							case "eval":
+							case"eval":
 								r(new Function(...Object.keys(args),func).apply(that,Object.values(args)));
 						}
 					});
 					return{
 						call:(func,that,args=[])=>___call(func,that,args,"call"),
-						//requires CSP of `script-src 'unsafe-eval';`
+						//  v  requires CSP of `script-src 'unsafe-eval';`  v
 						eval:(func,that,args={})=>___call(func,that,args,"eval"),
 						save:(name,func,args=[])=>{
 							worker.funcs[name]=new Function(...args,func);
@@ -95,4 +98,4 @@ var worker=function(funcs){
 			resolve();
 		});
 	});
-}();
+};
