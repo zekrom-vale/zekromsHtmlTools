@@ -139,3 +139,12 @@
 }.switch.round:not(.svg) span::before{
 	border-radius:50%;
 }
+
+@keyframes transiton{
+	from:{background-color:inherit}
+	to:{background-color:var(--on)}
+}
+@-webkit-keyframes transiton{
+	from:{background-color:inherit}
+	to:{background-color:var(--on)}
+}
